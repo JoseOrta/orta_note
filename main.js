@@ -94,9 +94,13 @@ function createWindow() {
                 {
                     label: 'Corrector Ortográfico',
                     type: 'checkbox',
-                    checked: true,
-                    click: (menuItem) => {
-                        mainWindow.webContents.send('toggle-spellcheck', menuItem.checked);
+                    checked: true, // Por defecto activado
+                    click: (menuItem, browserWindow) => {
+                        // Enviamos el estado al editor
+                        browserWindow.webContents.send('toggle-spellcheck', menuItem.checked);
+                        
+                        // Opcional: Activar/Desactivar a nivel de sesión de Electron
+                        browserWindow.webContents.session.setSpellCheckerEnabled(menuItem.checked);
                     }
                 },
                 {

@@ -389,6 +389,16 @@
          // FIN Autoguardado del documento que se está editando
 
 
+        //  Correcto ortografico
+        ipcRenderer.on('toggle-spellcheck', (event, isEnabled) => {
+            const editorElement = document.querySelector('.ql-editor');
+            if (editorElement) {
+                // El atributo 'spellcheck' es nativo del navegador/Electron
+                editorElement.setAttribute('spellcheck', isEnabled);
+                console.log(`Corrector ortográfico: ${isEnabled ? 'Activado' : 'Desactivado'}`);
+            }
+        });
+
 
 
 
