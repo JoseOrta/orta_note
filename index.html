@@ -121,31 +121,49 @@
         });
 
         function processOrtaSyntax(range) {
-            const [line, offset] = quill.getLine(range.index);
-            const textBefore = line.domNode.textContent.slice(0, offset);
+    const [line, offset] = quill.getLine(range.index);
+    const textBefore = line.domNode.textContent.slice(0, offset);
+    
+    // Regex mejorada: admite prefijos como 'n' o 'tp'
+    const match = textBefore.match(/([a-z]+)-([^-]+)-$/); 
+    
+    if (match) {
+            const fullMatch = match[0]; 
+            const prefix = match[1]; 
+            const content = match[2];
+            const startIndex = range.index - fullMatch.length;
             const formats = {
                 'n': { bold: true }, 'i': { italic: true }, 's': { underline: true },
+                'tp': { strike: true }, // <--- Aquí definimos 'tp'
                 't': { header: 1 }, 'st': { header: 2 }, 'cod': { 'code-block': true }, 'todo': { list: 'check' }
             };
-            const match = textBefore.match(/(\w+)-([^-]+)-$/);
-            if (match) {
-                const fullMatch = match[0]; const prefix = match[1]; const content = match[2];
-                const startIndex = range.index - fullMatch.length;
-                if (formats.hasOwnProperty(prefix)) {
-                    quill.deleteText(startIndex, fullMatch.length);
-                    quill.insertText(startIndex, content);
-                    if (prefix === 't' || prefix === 'st' || prefix === 'cod' || prefix === 'todo') {
-                        const formatName = prefix === 'cod' ? 'code-block' : (prefix === 'todo' ? 'list' : 'header');
-                        const formatValue = formats[prefix][formatName] || formats[prefix].header;
-                        quill.formatLine(startIndex, content.length, formatName, formatValue);
-                    } else {
-                        quill.formatText(startIndex, content.length, formats[prefix]);
-                    }
-                    quill.setSelection(startIndex + content.length);
-                    quill.format('bold', false); quill.format('italic', false); quill.format('underline', false);
+
+
+
+            if (formats.hasOwnProperty(prefix)) {
+                // Borramos el código 'tp-texto-'
+                quill.deleteText(startIndex, fullMatch.length);
+                // Insertamos el texto limpio
+                quill.insertText(startIndex, content);
+
+                if (prefix === 't' || prefix === 'st' || prefix === 'cod' || prefix === 'todo') {
+                    const formatName = prefix === 'cod' ? 'code-block' : (prefix === 'todo' ? 'list' : 'header');
+                    const formatValue = formats[prefix][formatName] || formats[prefix].header;
+                    quill.formatLine(startIndex, content.length, formatName, formatValue);
+                } else {
+                    // Aplicamos negrita, cursiva O TACHADO (strike)
+                    quill.formatText(startIndex, content.length, formats[prefix]);
                 }
+
+                // Movemos el cursor al final y reseteamos formatos para seguir escribiendo limpio
+                quill.setSelection(startIndex + content.length);
+                quill.format('bold', false); 
+                quill.format('italic', false); 
+                quill.format('underline', false);
+                quill.format('strike', false); // <--- Reseteo de tachado
             }
         }
+    }
 
         /* --- EVENTOS DE EDICIÓN DEL MENÚ --- */
         ipcRenderer.on('edit-undo', () => quill.history.undo());
@@ -270,7 +288,6 @@
         }
     });
     //Sintax Orta para Lista de tarea fin
-
 
     //Soltar imagen sobre orta note
     const editorContainer = document.getElementById('editor');
