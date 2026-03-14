@@ -65,6 +65,17 @@ function createWindow() {
                         }
                     }
                 }, //Guardar Txt
+
+                // Exportar pdf
+                {
+                    label: 'Exportar como PDF',
+                    accelerator: 'CmdOrCtrl+P',
+                    click: () => {
+                        // En este caso, el Main puede disparar la accion directamente
+                        ipcMain.emit('export-to-pdf'); 
+                    }
+                }, // Fin exportar pef
+
                 { label: 'Guardar como...', accelerator: 'CmdOrCtrl+Shift+S', click: () => mainWindow.webContents.send('file-save-as') },
                 { type: 'separator' },
                 { label: 'Salir', role: 'quit' }
@@ -313,8 +324,44 @@ function createWindow() {
     /*Exportar TXT */
 
 
+        // Exportar PDF
 
-    // ontop
+        ipcMain.on('export-to-pdf', (event) => {
+            const pdfPath = path.join(app.getPath('documents'), 'nota_orta.pdf');
+            
+            const options = {
+                title: 'Exportar Nota como PDF',
+                defaultPath: pdfPath,
+                buttonLabel: 'Guardar PDF',
+                filters: [{ name: 'Adobe PDF', extensions: ['pdf'] }]
+            };
+        
+            dialog.showSaveDialog(mainWindow, options).then(result => {
+                if (!result.canceled && result.filePath) {
+                    // Generamos el PDF desde el contenido de la ventana
+                    mainWindow.webContents.printToPDF({
+                        printBackground: true, // Importante para mantener tus estilos y bloques de codigo
+                        marginsType: 1,        // Margenes estandar
+                        pageSize: 'A4'
+                    }).then(data => {
+                        fs.writeFile(result.filePath, data, (error) => {
+                            if (error) {
+                                console.error('Error al escribir PDF:', error);
+                            } else {
+                                console.log('PDF exportado con éxito a:', result.filePath);
+                            }
+                        });
+                    }).catch(error => {
+                        console.error('Error al generar PDF:', error);
+                    });
+                }
+            });
+        }); 
+        // Exportar PDF
+
+        
+
+
 
 
 
