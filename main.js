@@ -54,6 +54,17 @@ function createWindow() {
                 },
                 { label: 'Abrir...', accelerator: 'CmdOrCtrl+O', click: () => openFile() },
                 { label: 'Guardar', accelerator: 'CmdOrCtrl+S', click: () => mainWindow.webContents.send('file-save') },
+                //Guardar Txt
+                {
+                    label: 'Exportar Texto Plano', // Nombre actualizado
+                    accelerator: 'CmdOrCtrl+E',
+                    click: () => {
+                        // Verificamos que mainWindow exista antes de enviar
+                        if (mainWindow) {
+                            mainWindow.webContents.send('request-export-txt');
+                        }
+                    }
+                }, //Guardar Txt
                 { label: 'Guardar como...', accelerator: 'CmdOrCtrl+Shift+S', click: () => mainWindow.webContents.send('file-save-as') },
                 { type: 'separator' },
                 { label: 'Salir', role: 'quit' }
@@ -241,6 +252,35 @@ function createWindow() {
             if (err) console.error('Error en backup:', err);
         });
     }); /* Autoguardado del codigo */
+
+
+    /*Exportar TXT */
+            ipcMain.on('export-to-txt', (event, textContent) => {
+            const options = {
+                title: 'Exportar Nota como Texto Plano',
+                defaultPath: path.join(app.getPath('documents'), 'nota_orta.txt'),
+                buttonLabel: 'Exportar',
+                filters: [
+                    { name: 'Archivos de Texto', extensions: ['txt'] },
+                    { name: 'Todos los archivos', extensions: ['*'] }
+                ]
+            };
+
+            dialog.showSaveDialog(mainWindow, options).then(result => {
+                if (!result.canceled && result.filePath) {
+                    fs.writeFile(result.filePath, textContent, (err) => {
+                        if (err) {
+                            console.error('Error al exportar:', err);
+                        } else {
+                            console.log('Exportación exitosa a:', result.filePath);
+                        }
+                    });
+                }
+            }).catch(err => {
+                console.error('Error en el diálogo de guardado:', err);
+            });
+        });
+    /*Exportar TXT */
 
 
 

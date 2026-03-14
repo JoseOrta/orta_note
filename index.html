@@ -324,6 +324,22 @@
     // Configuracion: Intervalo de 30 segundos (30000 ms)
 
 
+    //Exportar texto plano
+    ipcRenderer.on('request-export-txt', () => {
+        console.log("Recibida petición de exportación..."); // Debug para tu consola (F12)
+        
+        // Obtenemos el texto de Quill
+        const text = quill.getText();
+        
+        // Lo enviamos de vuelta al proceso principal para que abra el diálogo de guardado
+        ipcRenderer.send('export-to-txt', text);
+    });
+
+
+
+ //Exportar texto plano
+
+
     //Fin script
     </script> 
     </body>
