@@ -65,18 +65,22 @@
             <button class="ql-list" value="bullet"></button>
             <button class="ql-list" value="check"></button>
         </span>
+        <!--Botones codigo, link, imagen, limpiar-->
         <span class="ql-formats">
             <button class="ql-code-block"></button>
+            <button class="ql-link"></button> <button class="ql-image"></button>
             <button class="ql-image"></button>
             <button class="ql-clean"></button>
         </span>
     </div>
     <div id="editor"></div>
+    <!-- Barra de estatus -->
     <div id="status-bar">
         <span id="line-number">Línea: 1</span> <span class="separator">|</span>
         <span id="char-count">Caracteres: 0</span>
         <span class="separator">|</span>
         <span id="word-count">Palabras: 0</span>
+        <span id="ontop-status" style="color: #007acc; font-weight: bold; display: none;">📌 FIJADO</span>
     </div>
     <script src="./node_modules/quill/dist/quill.js"></script>
     <script src="./node_modules/quill-image-resize-module/image-resize.min.js"></script>
@@ -333,11 +337,14 @@
         
         // Lo enviamos de vuelta al proceso principal para que abra el diálogo de guardado
         ipcRenderer.send('export-to-txt', text);
-    });
+    }); //Exportar texto plano
 
-
-
- //Exportar texto plano
+    
+    //ventana ontop
+    ipcRenderer.on('ontop-updated', (event, isAlwaysOnTop) => {
+    const status = document.getElementById('ontop-status');
+    status.style.display = isAlwaysOnTop ? 'inline' : 'none';
+    });  //ventana ontop
 
 
     //Fin script

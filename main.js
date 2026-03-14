@@ -158,7 +158,33 @@ function createWindow() {
                         });
                         if (choice === 1) shell.openExternal('https://www.linkedin.com/in/jose-orta-in/');
                     }
-                }
+                },
+
+
+                {
+                    label: 'Ventana',
+                    submenu: [
+                        {
+                            label: 'Siempre al Frente',
+                            type: 'checkbox',
+                            accelerator: 'CmdOrCtrl+Shift+T',
+                            checked: false,
+                            click: (menuItem, browserWindow) => {
+                                // 1. Activa/Desactiva la propiedad nativa de la ventana
+                                browserWindow.setAlwaysOnTop(menuItem.checked);
+                                
+                                // 2. Avisa al index.html para que muestre el pin 📌
+                                browserWindow.webContents.send('ontop-updated', menuItem.checked);
+                            }
+                        },
+                        { type: 'separator' },
+                        { label: 'Reiniciar App', role: 'reload' },
+                        { label: 'DevTools', role: 'toggleDevTools' }
+                    ]
+                },
+                // fin ontop
+
+
             ]
         }
     ];
@@ -281,6 +307,11 @@ function createWindow() {
             });
         });
     /*Exportar TXT */
+
+
+
+    // ontop
+
 
 
 
