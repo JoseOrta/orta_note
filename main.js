@@ -16,7 +16,6 @@ function createWindow() {
         center: true,
         icon: path.join(__dirname, 'build/icon.ico')
     });
-
     splash.loadFile('splash.html');
 
     // 2. Configurar la ventana principal (oculta al inicio)
@@ -32,6 +31,24 @@ function createWindow() {
             spellcheck: true
         }
     });
+
+    // Inicio del codigo: Forzar apertura de links en navegador externo
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+        // Importamos shell de electron si no lo tienes arriba
+        const { shell } = require('electron');
+        shell.openExternal(url); // Abre el link en el navegador del usuario
+        return { action: 'deny' }; // Niega la apertura dentro de Orta Note
+    });
+
+    // Tambien capturamos navegaciones accidentales
+    mainWindow.webContents.on('will-navigate', (event, url) => {
+        if (url !== mainWindow.webContents.getURL()) {
+            event.preventDefault();
+            const { shell } = require('electron');
+            shell.openExternal(url);
+        }
+    });
+// Fin del codigo: Forzar apertura de links en navegador externo
 
     // 3. Configuración del Menú de arriba
     const template = [
@@ -51,6 +68,29 @@ function createWindow() {
                         if (choice === 0) mainWindow.webContents.send('file-new-confirmed');
                     }
                 },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 { label: 'Abrir...', accelerator: 'CmdOrCtrl+O', click: () => openFile() },
                 { label: 'Guardar', accelerator: 'CmdOrCtrl+S', click: () => mainWindow.webContents.send('file-save') },
                 //Guardar Txt
