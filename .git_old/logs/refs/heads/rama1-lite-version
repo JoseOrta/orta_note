@@ -1,0 +1,15 @@
+0000000000000000000000000000000000000000 fcdbbdc434c27366e752fb3d358a8429ebe6997b Jose Orta <joseanibalorta@gmail.com> 1773364375 -0400	branch: Created from HEAD
+fcdbbdc434c27366e752fb3d358a8429ebe6997b 5bf0a51194534473e3a7979b10d338dd0a7cbc4f Jose Orta <joseanibalorta@gmail.com> 1773364677 -0400	commit: feat: base electron structure working
+5bf0a51194534473e3a7979b10d338dd0a7cbc4f 2ed3707a15f3bdd62b226a2f4b505535cd35f865 Jose Orta <joseanibalorta@gmail.com> 1773365225 -0400	commit: feat: minimalist editor with Quill and middle-click paste
+2ed3707a15f3bdd62b226a2f4b505535cd35f865 6f471246353180ddf460521663d605dd50869e9a Jose Orta <joseanibalorta@gmail.com> 1773365538 -0400	commit: fix: correct electron version tag and add quill dependency
+6f471246353180ddf460521663d605dd50869e9a f9598e0818e41f255f47873c675e6daddf67bb9c Jose Orta <joseanibalorta@gmail.com> 1773367230 -0400	commit: fix: restore image paste, code blocks and middle-click functionality
+f9598e0818e41f255f47873c675e6daddf67bb9c 38a0ef8d3cf6b8dcf3bc4430ec2a33df3633046a Jose Orta <joseanibalorta@gmail.com> 1773368091 -0400	commit: feat: add auto-copy on select and context menu with spellcheck
+38a0ef8d3cf6b8dcf3bc4430ec2a33df3633046a 46d1a55656892209645e05d73c959d033e5b540b Jose Orta <joseanibalorta@gmail.com> 1773368817 -0400	commit: Primera version definitiva, hace todo lo básico, ahora solo falta que guarde, cree y abra archivos
+46d1a55656892209645e05d73c959d033e5b540b 521fe1d0c7d5e42d84be9e037cab958280e7c8d1 Jose Orta <joseanibalorta@gmail.com> 1773369099 -0400	commit: chore: full offline migration using local node_modules
+521fe1d0c7d5e42d84be9e037cab958280e7c8d1 d3c0ed4f832bf040c8c2a2ea1f0e2809bf9774ea Jose Orta <joseanibalorta@gmail.com> 1773374113 -0400	commit: feat: finalized Orta Note Syntax (n:, c:, s:, t:, st:, cod:, l:)
+d3c0ed4f832bf040c8c2a2ea1f0e2809bf9774ea 7b74706c3613eece21faae5aab16bc30a29b3aab Jose Orta <joseanibalorta@gmail.com> 1773374908 -0400	commit: Input formating listos, ya tenemos una base utilizable
+7b74706c3613eece21faae5aab16bc30a29b3aab 6fecb4d816d870f842c414343a40090050828e58 Jose Orta <joseanibalorta@gmail.com> 1773445260 -0400	commit: añadir nuevas cosas
+6fecb4d816d870f842c414343a40090050828e58 917d6b95f15c3c9f48b5a2320b03e3cb57e3a78b Jose Orta <joseanibalorta@gmail.com> 1773448184 -0400	commit: Se añadio la fuente JetBrainsMono-Regular como oficial y offline
+917d6b95f15c3c9f48b5a2320b03e3cb57e3a78b 34b6bed8e059e101f120eb8da3c9c2330a296bc5 Jose Orta <joseanibalorta@gmail.com> 1773449501 -0400	commit: Se añadió un splash de inicio
+34b6bed8e059e101f120eb8da3c9c2330a296bc5 bf9e4ed97a16c06ca437e35f1bea1bd674346f52 Jose Orta <joseanibalorta@gmail.com> 1773456931 -0400	commit: menu desactivar corrector, sintaxis orta nueva n--
+bf9e4ed97a16c06ca437e35f1bea1bd674346f52 2ef142833f524e2b60213cff17ff962e1ee59322 Jose Orta <joseanibalorta@gmail.com> 1773458853 -0400	commit: Se añadió el metodo para crear listas de tareas

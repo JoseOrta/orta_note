@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>orta_note Lite</title>
+    <link href="./node_modules/quill/dist/quill.snow.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+    
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; background: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        #toolbar { border-bottom: 1px solid #ddd; background: #fafafa; padding: 5px; }
+        #editor { height: calc(100vh - 85px); font-size: 16px; }
+        .ql-container.ql-snow { border: none !important; }
+        .ql-editor { padding: 30px 50px; line-height: 1.6; height: 100%; }
+        
+        .ql-editor pre.ql-syntax { 
+            background-color: #272822 !important; 
+            color: #f8f8f2 !important; 
+            padding: 15px !important; 
+            border-radius: 5px; 
+            font-family: 'Consolas', monospace; 
+        }
+
+        #status-bar {
+            height: 25px;
+            background: #f0f0f0;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            z-index: 100;
+            gap: 15px;
+        }
+
+        .ql-editor li[data-list="checked"] {
+            text-decoration: line-through;
+            color: #a0a0a0;
+            transition: all 0.3s ease;
+        }
+    </style>
+    </head>
+<body>
+
+    <div id="toolbar">
+        <span class="ql-formats">
+            <select class="ql-header">
+                <option value="1">Título</option>
+                <option value="2">Subtítulo</option>
+                <option selected>Normal</option>
+            </select>
+        </span>
+        <span class="ql-formats">
+            <button class="ql-bold"></button>
+            <button class="ql-italic"></button>
+            <button class="ql-underline"></button>
+            <button class="ql-strike"></button>
+        </span>
+        <span class="ql-formats">
+            <button class="ql-list" value="ordered"></button>
+            <button class="ql-list" value="bullet"></button>
+            <button class="ql-list" value="check"></button>
+        </span>
+        <span class="ql-formats">
+            <button class="ql-code-block"></button>
+            <button class="ql-image"></button>
+            <button class="ql-clean"></button>
+        </span>
+    </div>
+    <div id="editor"></div>
+    <div id="status-bar">
+        <span id="line-number">Línea: 1</span> <span class="separator">|</span>
+        <span id="char-count">Caracteres: 0</span>
+        <span class="separator">|</span>
+        <span id="word-count">Palabras: 0</span>
+    </div>
+    <script src="./node_modules/quill/dist/quill.js"></script>
+    <script src="./node_modules/quill-image-resize-module/image-resize.min.js"></script>
+    <script>
+        const { ipcRenderer } = require('electron');
+        let currentFilePath = null;
+        window.Quill = Quill; 
+
+        var quill = new Quill('#editor', {
+            theme: 'snow',
+            modules: { 
+                toolbar: '#toolbar',
+                imageResize: { displaySize: true },
+                keyboard: {
+                    bindings: {
+                        'space-trigger': {
+                            key: ' ',
+                            handler: function(range, context) {
+                                processOrtaSyntax(range);
+                                return true;
+                            }
+                        }
+                    }
+                }
+            },
+            placeholder: '    Orta Note'
+        });
+
+        function processOrtaSyntax(range) {
+            const [line, offset] = quill.getLine(range.index);
+            const textBefore = line.domNode.textContent.slice(0, offset);
+            const formats = {
+                'n': { bold: true }, 'i': { italic: true }, 's': { underline: true },
+                't': { header: 1 }, 'st': { header: 2 }, 'cod': { 'code-block': true }, 'todo': { list: 'check' }
+            };
+            const match = textBefore.match(/(\w+)-([^-]+)-$/);
+            if (match) {
+                const fullMatch = match[0]; const prefix = match[1]; const content = match[2];
+                const startIndex = range.index - fullMatch.length;
+                if (formats.hasOwnProperty(prefix)) {
+                    quill.deleteText(startIndex, fullMatch.length);
+                    quill.insertText(startIndex, content);
+                    if (prefix === 't' || prefix === 'st' || prefix === 'cod' || prefix === 'todo') {
+                        const formatName = prefix === 'cod' ? 'code-block' : (prefix === 'todo' ? 'list' : 'header');
+                        const formatValue = formats[prefix][formatName] || formats[prefix].header;
+                        quill.formatLine(startIndex, content.length, formatName, formatValue);
+                    } else {
+                        quill.formatText(startIndex, content.length, formats[prefix]);
+                    }
+                    quill.setSelection(startIndex + content.length);
+                    quill.format('bold', false); quill.format('italic', false); quill.format('underline', false);
+                }
+            }
+        }
+
+        /* --- EVENTOS DE EDICIÓN DEL MENÚ --- */
+        ipcRenderer.on('edit-undo', () => quill.history.undo());
+        ipcRenderer.on('edit-redo', () => quill.history.redo());
+        ipcRenderer.on('edit-cut', () => document.execCommand('cut'));
+        ipcRenderer.on('edit-copy', () => document.execCommand('copy'));
+        ipcRenderer.on('edit-paste', () => document.execCommand('paste'));
+
+        /* --- FUNCIONES DE ARCHIVOS --- */
+        ipcRenderer.on('file-new-confirmed', () => { quill.setContents([]); currentFilePath = null; updateStatusBar(); });
+        ipcRenderer.on('file-opened', (e, c, p) => { 
+            try { quill.setContents(JSON.parse(c)); } catch { quill.setText(c); } 
+            currentFilePath = p; 
+            updateStatusBar();
+        });
+        ipcRenderer.on('file-save', () => ipcRenderer.send('save-to-disk', JSON.stringify(quill.getContents()), currentFilePath, getSuggestedName()));
+        ipcRenderer.on('file-saved-success', (e, p) => currentFilePath = p);
+
+        /* --- ZOOM, AUTOGUARDADO Y STATUS BAR --- */
+        let currentFontSize = 16;
+        window.addEventListener('wheel', (e) => {
+            if (e.ctrlKey) {
+                e.preventDefault();
+                e.deltaY < 0 ? currentFontSize++ : (currentFontSize > 8 ? currentFontSize-- : null);
+                document.querySelector('.ql-editor').style.fontSize = `${currentFontSize}px`;
+            }
+        }, { passive: false });
+
+        let autoSaveTimeout;
+        quill.on('text-change', () => {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                if (currentFilePath) {
+                    ipcRenderer.send('save-to-disk', JSON.stringify(quill.getContents()), currentFilePath, getSuggestedName());
+                }
+            }, 2000);
+            updateStatusBar();
+        });
+
+        function updateStatusBar() {
+            const selection = quill.getSelection();
+            const text = quill.getText().trim();
+            if (selection) {
+                const textUntilCursor = quill.getText(0, selection.index);
+                document.getElementById('line-number').innerText = `Línea: ${textUntilCursor.split('\n').length}`;
+            }
+            document.getElementById('char-count').innerText = `Caracteres: ${text.length}`;
+            document.getElementById('word-count').innerText = `Palabras: ${text.length > 0 ? text.split(/\s+/).length : 0}`;
+        }
+
+        quill.on('selection-change', (range) => { if (range) updateStatusBar(); });
+
+        function getSuggestedName() {
+            const text = quill.getText(0, 50).trim();
+            return text.split('\n')[0].replace(/[/\\?%*:|"<>]/g, '').substring(0, 25) || 'nueva_nota';
+        }
+
+        //Copiar elemento sombreado
+        quill.on('selection-change', (range) => {
+            if (range && range.length > 0) {
+                // Obtenemos el texto sombreado
+                const selectedText = quill.getText(range.index, range.length);
+                
+                // Escribimos en el portapapeles de forma asíncrona
+                navigator.clipboard.writeText(selectedText).then(() => {
+                    console.log('Texto copiado automáticamente');
+                }).catch(err => {
+                    console.error('Error al copiar sombreado:', err);
+                });
+            }
+        });
+
+
+        //Pegar con mouse
+        document.getElementById('editor').addEventListener('auxclick', async (e) => {
+        // 1 es el código para el botón central (rueda)
+        if (e.button === 1) {
+            try {
+                // Leemos el contenido del portapapeles de forma asíncrona
+                const text = await navigator.clipboard.readText();
+                
+                // Obtenemos la posición actual del cursor en Quill
+                const range = quill.getSelection();
+                
+                if (range) {
+                    // Insertamos el texto en la posición del cursor
+                    quill.insertText(range.index, text);
+                    // Movemos el cursor al final del texto pegado
+                    quill.setSelection(range.index + text.length);
+                } else {
+                    // Si no hay foco, pegamos al final
+                    quill.insertText(quill.getLength(), text);
+                }
+            } catch (err) {
+                console.error('Error al pegar con la rueda:', err);
+            }
+        }
+    });
+
+    //Sintax Orta para Lista de tarea lt-
+    quill.on('text-change', (delta, oldDelta, source) => {
+        if (source === 'user') {
+            const selection = quill.getSelection();
+            if (selection) {
+                // Obtenemos la línea actual y su contenido
+                const [line] = quill.getLine(selection.index);
+                const text = line.domNode.textContent;
+
+                // Si el texto de la línea comienza con "lt- "
+                if (text.startsWith('lt- ')) {
+                    // Calculamos la posición donde comienza el prefijo
+                    // (selection.index - 4 porque "lt- " son 4 caracteres)
+                    const prefixIndex = selection.index - 4;
+                    
+                    // 1. Eliminamos el prefijo "lt- "
+                    quill.deleteText(prefixIndex, 4);
+                    
+                    // 2. Convertimos la línea en una lista de tareas (check)
+                    quill.formatLine(prefixIndex, 1, 'list', 'unchecked');
+                }
+            }
+        }
+    });
+    //Sintax Orta para Lista de tarea fin
+
+  
+
+
+
+
+    </script>
+    </body>
+</html>

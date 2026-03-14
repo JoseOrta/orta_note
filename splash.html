@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Splash Orta Note</title>
+    <style>
+        body {
+            background: #0078d4; /* Azul eléctrico Orta Note */
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .container { text-align: center; }
+        h1 { 
+            margin: 0; 
+            font-size: 28px; 
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        .loader {
+            margin: 25px auto;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top: 4px solid #ffffff;
+            width: 45px;
+            height: 45px;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #status-text { 
+            margin-top: 15px; 
+            font-size: 14px; 
+            font-family: 'Consolas', monospace; /* Toque técnico */
+            color: #e0e0e0;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Orta Note Lite</h1>
+        <div class="loader"></div>
+        <div id="status-text">Iniciando...</div>
+    </div>
+
+    <script>
+        const messages = [
+            "Estableciendo conexión SSH...",
+            "Limpiando caché del servidor...",
+            "Verificando integridad de scripts...",
+            "Reiniciando demonios de escritura...",
+            "Compilando sintaxis Orta...",
+            "Cargando módulos de sistema...",
+            "Escaneando puertos de entrada...",
+            "Optimizando base de datos local...",
+            "Desplegando entorno de notas..."
+        ];
+    
+        const statusElement = document.getElementById('status-text');
+        let lastIndex = -1;
+    
+        function updateMessage() {
+            let newIndex;
+            // Ciclo para asegurar que el nuevo mensaje no sea igual al anterior
+            do {
+                newIndex = Math.floor(Math.random() * messages.length);
+            } while (newIndex === lastIndex);
+            
+            lastIndex = newIndex;
+            statusElement.innerText = messages[newIndex];
+        }
+    
+        // Primer mensaje
+        updateMessage();
+    
+        // Rotación cada 1.5 segundos
+        setInterval(updateMessage, 1500);
+    </script>
+</body>
+</html>

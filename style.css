@@ -1,0 +1,70 @@
+/* Declaramos la fuente personalizada */
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url('./fonts/JetBrainsMono-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url('./fonts/JetBrainsMono-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+/* Aplicamos la fuente a todo el editor */
+#editor, .ql-editor {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 14px; /* Tamaño ideal para esta fuente */
+    line-height: 1.6;
+}
+
+/* Ajustamos la barra de herramientas para que también use la fuente */
+.ql-toolbar, .ql-container {
+    font-family: 'JetBrains Mono', monospace !important;
+}
+
+
+/* --- ESTILOS DE LA INTERFAZ  TOOLBAR--- */
+body, html { margin: 0; padding: 0; height: 100%; background: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+
+.toolbar-container { 
+    border-bottom: 1px solid #ddd; 
+    padding: 5px; 
+    background: #f8f9fa; 
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.ql-toolbar.ql-snow {
+    border: none !important;
+    background: #f8f9fa;
+    padding: 8px !important;
+    width: 100%;
+}
+
+#editor { height: calc(100vh - 85px); font-size: 16px; }
+
+.ql-editor li[data-list="checked"] {
+    text-decoration: line-through;
+    color: #a0a0a0;
+    transition: all 0.3s ease;
+}
+
+#status-bar {
+    height: 25px;
+    background: #f0f0f0;
+    border-top: 1px solid #ddd;
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    gap: 15px;
+}
+/* --- ESTILOS DE LA INTERFAZ  TOOLBAR--- */
