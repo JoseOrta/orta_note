@@ -3,8 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 
-let mainWindow;
-let splash;
+
 
 function createWindow() {
     // 1. Crear la ventana de carga (Splash)
@@ -359,9 +358,23 @@ function createWindow() {
         }); 
         // Exportar PDF
 
+        //Notificacion exportar pdf
         
-
-
+        function showSuccessNotification(fileName) {
+            try {
+                if (Notification.isSupported()) {
+                    const notif = new Notification({
+                        title: 'Orta Note',
+                        body: `Guardado exitoso: ${fileName}`,
+                        silent: false // Queremos que suene el "ping" de Windows
+                    });
+                    notif.show();
+                }
+            } catch (err) {
+                console.error('Error al lanzar notificación:', err);
+            }
+        }
+        
 
 
 
