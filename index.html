@@ -238,30 +238,36 @@
 
 
         //Pegar con mouse
+        // --- REEMPLAZA EL EVENTO AUXCLICK POR ESTE ---
         document.getElementById('editor').addEventListener('auxclick', async (e) => {
-        // 1 es el código para el botón central (rueda)
-        if (e.button === 1) {
-            try {
-                // Leemos el contenido del portapapeles de forma asíncrona
-                const text = await navigator.clipboard.readText();
-                
-                // Obtenemos la posición actual del cursor en Quill
-                const range = quill.getSelection();
-                
-                if (range) {
-                    // Insertamos el texto en la posición del cursor
-                    quill.insertText(range.index, text);
-                    // Movemos el cursor al final del texto pegado
-                    quill.setSelection(range.index + text.length);
-                } else {
-                    // Si no hay foco, pegamos al final
-                    quill.insertText(quill.getLength(), text);
+            // 1 es el código para el botón central (rueda)
+            if (e.button === 1) {
+                try {
+                    // Aseguramos que el editor tenga el foco para poder pegar
+                    quill.focus();
+                    
+                    // Leemos el contenido del portapapeles
+                    const text = await navigator.clipboard.readText();
+                    
+                    if (text) {
+                        // Obtenemos la posición actual del cursor
+                        const range = quill.getSelection(true);
+                        
+                        if (range) {
+                            // Insertamos el texto
+                            quill.insertText(range.index, text);
+                            // Movemos el cursor al final de lo pegado
+                            quill.setSelection(range.index + text.length);
+                        } else {
+                            // Si no hay selección, pegamos al final del documento
+                            quill.insertText(quill.getLength(), text);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Error crítico al pegar con rueda:', err);
                 }
-            } catch (err) {
-                console.error('Error al pegar con la rueda:', err);
             }
-        }
-    });
+        });
 
     //Sintax Orta para Lista de tarea lt-
     quill.on('text-change', (delta, oldDelta, source) => {

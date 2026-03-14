@@ -32,6 +32,10 @@ function createWindow() {
         }
     });
 
+
+
+
+
     // Inicio del codigo: Forzar apertura de links en navegador externo
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
         // Importamos shell de electron si no lo tienes arriba
@@ -68,29 +72,6 @@ function createWindow() {
                         if (choice === 0) mainWindow.webContents.send('file-new-confirmed');
                     }
                 },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 { label: 'Abrir...', accelerator: 'CmdOrCtrl+O', click: () => openFile() },
                 { label: 'Guardar', accelerator: 'CmdOrCtrl+S', click: () => mainWindow.webContents.send('file-save') },
                 //Guardar Txt
