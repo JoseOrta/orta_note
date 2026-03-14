@@ -256,6 +256,48 @@
     });
     //Sintax Orta para Lista de tarea fin
 
+
+    //Soltar imagen sobre orta note
+    const editorContainer = document.getElementById('editor');
+
+    // Prevenir el comportamiento por defecto del navegador (evita que se abra la imagen en otra pestaña)
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        editorContainer.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, false);
+    });
+
+    // Manejar el evento de soltar (drop)
+    editorContainer.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        if (files && files.length > 0) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                
+                // Verificar que sea una imagen
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = (event) => {
+                        const base64Image = event.target.result;
+                        const range = quill.getSelection();
+                        
+                        // Insertar la imagen en la posicion del cursor o al final
+                        const index = range ? range.index : quill.getLength();
+                        quill.insertEmbed(index, 'image', base64Image);
+                    };
+                    
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+    });
+
+    //Fin-Soltar imagen sobre orta note
+
   
 
 
