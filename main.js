@@ -2,6 +2,7 @@ const { app, BrowserWindow, Menu, MenuItem, dialog, ipcMain, shell } = require('
 const fs = require('fs');
 const path = require('path');
 
+
 let mainWindow;
 let splash;
 
@@ -71,6 +72,13 @@ function createWindow() {
                 { label: 'Pegar', accelerator: 'CmdOrCtrl+V', click: () => mainWindow.webContents.send('edit-paste') },
                 { label: 'Eliminar', click: () => mainWindow.webContents.send('edit-delete') },
                 { type: 'separator' },
+                /*Seleccionar todo eltexto*/
+                { 
+                    label: 'Seleccionar todo', 
+                    role: 'selectAll',
+                    accelerator: 'CmdOrCtrl+A' 
+                },
+                { type: 'separator' }, /*Seleccionar todo eltexto*/
                 /* --- HERRAMIENTAS DE SISTEMA --- */
                 {
                     label: 'Corrector Ortográfico',
@@ -196,47 +204,51 @@ function createWindow() {
     });
 }
 
-function openFile() {
-    const files = dialog.showOpenDialogSync(mainWindow, {
-        properties: ['openFile'],
-        filters: [{ name: 'Notas orta', extensions: ['json', 'txt', 'md'] }]
-    });
-    if (files) {
-        const content = fs.readFileSync(files[0], 'utf8');
-        mainWindow.webContents.send('file-opened', content, files[0]);
-    }
-}
-
-ipcMain.on('save-to-disk', (event, content, filePath, suggestedName) => {
-    if (filePath) {
-        fs.writeFileSync(filePath, content);
-        event.reply('file-saved-success', filePath);
-    } else {
-        const newPath = dialog.showSaveDialogSync(mainWindow, {
-            defaultPath: path.join(app.getPath('documents'), suggestedName),
-            filters: [{ name: 'Nota orta', extensions: ['json', 'txt'] }]
+    function openFile() {
+        const files = dialog.showOpenDialogSync(mainWindow, {
+            properties: ['openFile'],
+            filters: [{ name: 'Notas orta', extensions: ['json', 'txt', 'md'] }]
         });
-        if (newPath) {
-            fs.writeFileSync(newPath, content);
-            event.reply('file-saved-success', newPath);
+        if (files) {
+            const content = fs.readFileSync(files[0], 'utf8');
+            mainWindow.webContents.send('file-opened', content, files[0]);
         }
     }
-});
+
+    ipcMain.on('save-to-disk', (event, content, filePath, suggestedName) => {
+        if (filePath) {
+            fs.writeFileSync(filePath, content);
+            event.reply('file-saved-success', filePath);
+        } else {
+            const newPath = dialog.showSaveDialogSync(mainWindow, {
+                defaultPath: path.join(app.getPath('documents'), suggestedName),
+                filters: [{ name: 'Nota orta', extensions: ['json', 'txt'] }]
+            });
+            if (newPath) {
+                fs.writeFileSync(newPath, content);
+                event.reply('file-saved-success', newPath);
+            }
+        }
+    });
+
+
+    /* Autoguardado del codigo */
+    ipcMain.on('auto-save-recovery', (event, content) => {
+        // Aquí ya no usamos 'const path = ...' porque ya existe arriba
+        const recoveryPath = path.join(app.getPath('userData'), 'temp_recovery.orta');
+        
+        fs.writeFile(recoveryPath, content, (err) => {
+            if (err) console.error('Error en backup:', err);
+        });
+    }); /* Autoguardado del codigo */
+
+
+
+
+
 
 app.whenReady().then(createWindow);
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
 app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
 
 
-// Auto guardado para salvar el codigo de apagones
-const fs = require('fs');
-const path = require('path');
-
-ipcMain.on('auto-save-recovery', (event, content) => {
-    const recoveryPath = path.join(__dirname, 'temp_recovery.orta');
-    
-    // Escribimos de forma asincrona para no bloquear la app
-    fs.writeFile(recoveryPath, content, (err) => {
-        if (err) console.error('Error al escribir backup:', err);
-    });
-});// Auto guardado para salvar el codigo de apagones
