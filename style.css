@@ -68,3 +68,9 @@ body, html { margin: 0; padding: 0; height: 100%; background: #fff; font-family:
     gap: 15px;
 }
 /* --- ESTILOS DE LA INTERFAZ  TOOLBAR--- */
+
+/*Guardado automatico del documento*/
+#status-bar {
+    justify-content: flex-start; /* Alinea todo al inicio */
+    padding-right: 10px;        /* Espacio de seguridad al final */
+}

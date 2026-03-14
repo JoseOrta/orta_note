@@ -91,6 +91,7 @@
         <span class="separator">|</span>
         <span id="word-count">Palabras: 0</span>
         <span id="ontop-status" style="color: #007acc; font-weight: bold; display: none;">📌 FIJADO</span>
+        <span id="save-status" style="margin-left: auto; margin-right: 20px; color: #28a745; font-weight: bold; opacity: 0; transition: opacity 0.3s; white-space: nowrap;">✓ Guardado</span>
     </div>
     <script src="./node_modules/quill/dist/quill.js"></script>
     <script src="./node_modules/quill-image-resize-module/image-resize.min.js"></script>
@@ -355,6 +356,41 @@
     const status = document.getElementById('ontop-status');
     status.style.display = isAlwaysOnTop ? 'inline' : 'none';
     });  //ventana ontop
+
+
+    // Autoguardado del documento que se está editando
+
+            function showSaveMessage() {
+            const saveStatus = document.getElementById('save-status');
+            saveStatus.style.opacity = '1'; // Lo hace visible
+            
+            setTimeout(() => {
+                saveStatus.style.opacity = '0'; // Lo oculta tras 2 segundos
+            }, 2000);
+        }
+
+        // Integramos en tu listener de 'text-change' ya existente
+        quill.on('text-change', () => {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                if (currentFilePath) {
+                    ipcRenderer.send('save-to-disk', JSON.stringify(quill.getContents()), currentFilePath, getSuggestedName());
+                    showSaveMessage(); // <--- Llamamos a la función aquí
+                }
+            }, 2000);
+            updateStatusBar();
+        });
+
+        // También lo añadimos para el respaldo de seguridad (el de los 30s)
+        ipcRenderer.on('file-saved-success', (e, p) => {
+            currentFilePath = p;
+            showSaveMessage(); // Confirmación visual de guardado exitoso
+        });
+         // FIN Autoguardado del documento que se está editando
+
+
+
+
 
 
     //Fin script
