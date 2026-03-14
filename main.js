@@ -226,3 +226,17 @@ ipcMain.on('save-to-disk', (event, content, filePath, suggestedName) => {
 app.whenReady().then(createWindow);
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
 app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
+
+
+// Auto guardado para salvar el codigo de apagones
+const fs = require('fs');
+const path = require('path');
+
+ipcMain.on('auto-save-recovery', (event, content) => {
+    const recoveryPath = path.join(__dirname, 'temp_recovery.orta');
+    
+    // Escribimos de forma asincrona para no bloquear la app
+    fs.writeFile(recoveryPath, content, (err) => {
+        if (err) console.error('Error al escribir backup:', err);
+    });
+});// Auto guardado para salvar el codigo de apagones

@@ -298,11 +298,33 @@
 
     //Fin-Soltar imagen sobre orta note
 
-  
+
+    // Autoguardado del codigo, por si se va la luz Configuracion: Intervalo de 30 segundos (30000 ms)
+    const AUTO_SAVE_INTERVAL = 30000;
+    let lastContent = '';
+
+    setInterval(async () => {
+        try {
+            // Obtenemos el contenido actual en formato Delta (mas ligero y preciso)
+            const currentContent = JSON.stringify(quill.getContents());
+
+            // Solo guardamos si el contenido ha cambiado para no estresar el disco
+            if (currentContent !== lastContent) {
+                // Enviamos al proceso principal para escribir el archivo fisico
+                // Nota: Debes tener el canal 'auto-save-recovery' configurado en main.js
+                ipcRenderer.send('auto-save-recovery', currentContent);
+                
+                lastContent = currentContent;
+                console.log('Respaldo de seguridad actualizado automáticamente.');
+            }
+        } catch (err) {
+            console.error('Error en el proceso de auto-guardado:', err);
+        }
+    }, AUTO_SAVE_INTERVAL);
+    // Configuracion: Intervalo de 30 segundos (30000 ms)
 
 
-
-
-    </script>
+    //Fin script
+    </script> 
     </body>
 </html>
