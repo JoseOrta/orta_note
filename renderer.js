@@ -380,73 +380,99 @@ setTimeout(() => {
 
 //Motor de busqueda d epalabras
 
+// --- Motor de Búsqueda con Resaltado Visual v1.1.2 ---
 let searchIndices = [];
 let currentSearchIndex = -1;
+let lastHighlightedRange = null; // Para limpiar el resaltado anterior
 
-// Mostrar barra con Ctrl + F (Opcional, pero recomendado)
-window.addEventListener('keydown', (e) => {
-    if (e.ctrlKey && e.key === 'f') {
-        e.preventDefault();
-        const bar = document.getElementById('search-bar');
-        bar.style.display = 'flex';
-        document.getElementById('search-input').focus();
+const sInput = document.getElementById('search-input');
+const sCount = document.getElementById('search-count');
+
+sInput.addEventListener('input', function() {
+    // Limpiar resaltado previo al escribir algo nuevo
+    limpiarResaltado();
+
+    // Si el usuario borra la búsqueda, limpiamos el color del texto
+    if (this.value === "") {
+        limpiarResaltado();
     }
-});
-
-// Función Principal de Búsqueda
-document.getElementById('search-input').addEventListener('input', function() {
-    const query = this.value;
-    const text = quill.getText();
+       
+    const query = this.value.toLowerCase();
+    const text = quill.getText().toLowerCase();
     searchIndices = [];
     currentSearchIndex = -1;
 
     if (query.length > 0) {
-        let index = text.toLowerCase().indexOf(query.toLowerCase());
+        let index = text.indexOf(query);
         while (index !== -1) {
             searchIndices.push(index);
-            index = text.toLowerCase().indexOf(query.toLowerCase(), index + 1);
+            index = text.indexOf(query, index + 1);
         }
     }
+
     updateSearchUI();
 });
 
-// Evento Enter para avanzar
-document.getElementById('search-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && searchIndices.length > 0) {
-        navigateSearch(1);
+sInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        if (searchIndices.length > 0) {
+            navegar(1);
+        }
     }
 });
 
-function navigateSearch(direction) {
-    if (searchIndices.length === 0) return;
+function navegar(dir) {
+    limpiarResaltado(); // Quitar el color amarillo de la palabra anterior
 
-    currentSearchIndex += direction;
-    if (currentSearchIndex >= searchIndices.length) currentSearchIndex = 0;
-    if (currentSearchIndex < 0) currentSearchIndex = searchIndices.length - 1;
-
+    currentSearchIndex = (currentSearchIndex + dir + searchIndices.length) % searchIndices.length;
+    
     const pos = searchIndices[currentSearchIndex];
-    const queryLen = document.getElementById('search-input').value.length;
+    const len = sInput.value.length;
 
-    // Resaltar en el editor y hacer scroll
-    quill.setSelection(pos, queryLen, 'user');
+    // 1. Aplicamos un formato de fondo amarillo a la coincidencia
+    quill.formatText(pos, len, { 'background': 'black', 'color': 'cyan' }, 'api');
+    
+    // 2. Guardamos el rango para poder limpiarlo luego
+    lastHighlightedRange = { index: pos, length: len };
+
+    // 3. Movemos el scroll
+    quill.setSelection(pos, 0, 'api'); 
+    quill.scrollIntoView();
+
+    // 4. Mantenemos el foco en la barra
+    sInput.focus({ preventScroll: true });
+    
     updateSearchUI();
+}
+
+function limpiarResaltado() {
+    if (lastHighlightedRange) {
+        // Quitamos el fondo y restauramos el color (null vuelve al original)
+        quill.formatText(lastHighlightedRange.index, lastHighlightedRange.length, { 'background': false, 'color': false }, 'api');
+        lastHighlightedRange = null;
+    }
 }
 
 function updateSearchUI() {
-    const countSpan = document.getElementById('search-count');
-    if (searchIndices.length > 0) {
-        countSpan.innerText = `${currentSearchIndex + 1}/${searchIndices.length}`;
-    } else {
-        countSpan.innerText = "0/0";
+    sCount.innerText = searchIndices.length > 0 ? `${currentSearchIndex + 1}/${searchIndices.length}` : "0/0";
+}
+
+function limpiarResaltado() {
+    if (lastHighlightedRange) {
+        // Quitamos el fondo y el color de la última coincidencia
+        quill.formatText(lastHighlightedRange.index, lastHighlightedRange.length, { 
+            'background': false, 
+            'color': false 
+        }, 'api');
+        lastHighlightedRange = null;
     }
 }
 
-// Botones de navegación
-document.getElementById('btn-next').onclick = () => navigateSearch(1);
-document.getElementById('btn-prev').onclick = () => navigateSearch(-1);
-document.getElementById('btn-close-search').onclick = () => {
-    document.getElementById('search-bar').style.display = 'none';
-};
+// Botones
+document.getElementById('btn-next').onclick = (e) => { e.preventDefault(); navegar(1); };
+document.getElementById('btn-prev').onclick = (e) => { e.preventDefault(); navegar(-1); };
+//Fin motor de busqueda
 
 
 
