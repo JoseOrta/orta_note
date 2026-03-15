@@ -1,0 +1,349 @@
+const { ipcRenderer } = require('electron');
+let currentFilePath = null;
+window.Quill = Quill; 
+
+var quill = new Quill('#editor', {
+    theme: 'snow',
+    modules: { 
+        toolbar: '#toolbar',
+        imageResize: { displaySize: true },
+        keyboard: {
+            bindings: {
+                'space-trigger': {
+                    key: ' ',
+                    handler: function(range, context) {
+                        processOrtaSyntax(range);
+                        return true;
+                    }
+                }
+            }
+        }
+    },
+    placeholder: '    Orta Note'
+});
+
+function processOrtaSyntax(range) {
+const [line, offset] = quill.getLine(range.index);
+const textBefore = line.domNode.textContent.slice(0, offset);
+
+// Regex mejorada: admite prefijos como 'n' o 'tp'
+const match = textBefore.match(/([a-z]+)-([^-]+)-$/); 
+
+if (match) {
+    const fullMatch = match[0]; 
+    const prefix = match[1]; 
+    const content = match[2];
+    const startIndex = range.index - fullMatch.length;
+    const formats = {
+        'n': { bold: true }, 'i': { italic: true }, 's': { underline: true },
+        'tp': { strike: true }, // <--- Aquí definimos 'tp'
+        't': { header: 1 }, 'st': { header: 2 }, 'cod': { 'code-block': true }, 'todo': { list: 'check' }
+    };
+
+
+
+    if (formats.hasOwnProperty(prefix)) {
+        // Borramos el código 'tp-texto-'
+        quill.deleteText(startIndex, fullMatch.length);
+        // Insertamos el texto limpio
+        quill.insertText(startIndex, content);
+
+        if (prefix === 't' || prefix === 'st' || prefix === 'cod' || prefix === 'todo') {
+            const formatName = prefix === 'cod' ? 'code-block' : (prefix === 'todo' ? 'list' : 'header');
+            const formatValue = formats[prefix][formatName] || formats[prefix].header;
+            quill.formatLine(startIndex, content.length, formatName, formatValue);
+        } else {
+            // Aplicamos negrita, cursiva O TACHADO (strike)
+            quill.formatText(startIndex, content.length, formats[prefix]);
+        }
+
+        // Movemos el cursor al final y reseteamos formatos para seguir escribiendo limpio
+        quill.setSelection(startIndex + content.length);
+        quill.format('bold', false); 
+        quill.format('italic', false); 
+        quill.format('underline', false);
+        quill.format('strike', false); // <--- Reseteo de tachado
+    }
+}
+}
+
+/* --- EVENTOS DE EDICIÓN DEL MENÚ --- */
+ipcRenderer.on('edit-undo', () => quill.history.undo());
+ipcRenderer.on('edit-redo', () => quill.history.redo());
+ipcRenderer.on('edit-cut', () => document.execCommand('cut'));
+ipcRenderer.on('edit-copy', () => document.execCommand('copy'));
+ipcRenderer.on('edit-paste', () => document.execCommand('paste'));
+
+/* --- FUNCIONES DE ARCHIVOS --- */
+ipcRenderer.on('file-new-confirmed', () => { quill.setContents([]); currentFilePath = null; updateStatusBar(); });
+ipcRenderer.on('file-opened', (e, c, p) => { 
+    try { quill.setContents(JSON.parse(c)); } catch { quill.setText(c); } 
+    currentFilePath = p; 
+    updateStatusBar();
+});
+ipcRenderer.on('file-save', () => ipcRenderer.send('save-to-disk', JSON.stringify(quill.getContents()), currentFilePath, getSuggestedName()));
+ipcRenderer.on('file-saved-success', (e, p) => currentFilePath = p);
+
+/* --- ZOOM, AUTOGUARDADO Y STATUS BAR --- */
+let currentFontSize = 16;
+window.addEventListener('wheel', (e) => {
+    if (e.ctrlKey) {
+        e.preventDefault();
+        e.deltaY < 0 ? currentFontSize++ : (currentFontSize > 8 ? currentFontSize-- : null);
+        document.querySelector('.ql-editor').style.fontSize = `${currentFontSize}px`;
+    }
+}, { passive: false });
+
+let autoSaveTimeout;
+quill.on('text-change', () => {
+    clearTimeout(autoSaveTimeout);
+    autoSaveTimeout = setTimeout(() => {
+        if (currentFilePath) {
+            ipcRenderer.send('save-to-disk', JSON.stringify(quill.getContents()), currentFilePath, getSuggestedName());
+        }
+    }, 2000);
+    updateStatusBar();
+});
+
+function updateStatusBar() {
+    const selection = quill.getSelection();
+    const text = quill.getText().trim();
+    if (selection) {
+        const textUntilCursor = quill.getText(0, selection.index);
+        document.getElementById('line-number').innerText = `Línea: ${textUntilCursor.split('\n').length}`;
+    }
+    document.getElementById('char-count').innerText = `Caracteres: ${text.length}`;
+    document.getElementById('word-count').innerText = `Palabras: ${text.length > 0 ? text.split(/\s+/).length : 0}`;
+}
+
+quill.on('selection-change', (range) => { if (range) updateStatusBar(); });
+
+function getSuggestedName() {
+    const text = quill.getText(0, 50).trim();
+    return text.split('\n')[0].replace(/[/\\?%*:|"<>]/g, '').substring(0, 25) || 'nueva_nota';
+}
+
+//Copiar elemento sombreado
+quill.on('selection-change', (range) => {
+    if (range && range.length > 0) {
+        // Obtenemos el texto sombreado
+        const selectedText = quill.getText(range.index, range.length);
+        
+        // Escribimos en el portapapeles de forma asíncrona
+        navigator.clipboard.writeText(selectedText).then(() => {
+            console.log('Texto copiado automáticamente');
+        }).catch(err => {
+            console.error('Error al copiar sombreado:', err);
+        });
+    }
+});
+
+
+//Pegar con mouse
+// --- REEMPLAZA EL EVENTO AUXCLICK POR ESTE ---
+document.getElementById('editor').addEventListener('auxclick', async (e) => {
+    // 1 es el código para el botón central (rueda)
+    // --- REEMPLAZA EL EVENTO AUXCLICK EN renderer.js ---
+document.getElementById('editor').addEventListener('mousedown', (e) => {
+    // Si es el botón central, prevenimos el auto-scroll de inmediato
+    if (e.button === 1) {
+        e.preventDefault();
+    }
+}, false);
+
+
+        //Pegar con rueda
+        document.getElementById('editor').addEventListener('auxclick', async (e) => {
+            if (e.button === 1) {
+                e.preventDefault(); // Doble seguridad para anular la flecha de desplazamiento
+                try {
+                    quill.focus();
+                    const text = await navigator.clipboard.readText();
+                    if (text) {
+                        const range = quill.getSelection(true);
+                        if (range) {
+                            quill.insertText(range.index, text);
+                            quill.setSelection(range.index + text.length);
+                        } else {
+                            quill.insertText(quill.getLength(), text);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Error al pegar con rueda:', err);
+                }
+            }
+        });
+});
+
+//Sintax Orta para Lista de tarea lt-
+quill.on('text-change', (delta, oldDelta, source) => {
+if (source === 'user') {
+    const selection = quill.getSelection();
+    if (selection) {
+        // Obtenemos la línea actual y su contenido
+        const [line] = quill.getLine(selection.index);
+        const text = line.domNode.textContent;
+
+        // Si el texto de la línea comienza con "lt- "
+        if (text.startsWith('lt- ')) {
+            // Calculamos la posición donde comienza el prefijo
+            // (selection.index - 4 porque "lt- " son 4 caracteres)
+            const prefixIndex = selection.index - 4;
+            
+            // 1. Eliminamos el prefijo "lt- "
+            quill.deleteText(prefixIndex, 4);
+            
+            // 2. Convertimos la línea en una lista de tareas (check)
+            quill.formatLine(prefixIndex, 1, 'list', 'unchecked');
+        }
+    }
+}
+});
+//Sintax Orta para Lista de tarea fin
+
+//Soltar imagen sobre orta note
+const editorContainer = document.getElementById('editor');
+
+// Prevenir el comportamiento por defecto del navegador (evita que se abra la imagen en otra pestaña)
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+editorContainer.addEventListener(eventName, (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+}, false);
+});
+
+// Manejar el evento de soltar (drop)
+editorContainer.addEventListener('drop', (e) => {
+const dt = e.dataTransfer;
+const files = dt.files;
+
+if (files && files.length > 0) {
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        
+        // Verificar que sea una imagen
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            
+            reader.onload = (event) => {
+                const base64Image = event.target.result;
+                const range = quill.getSelection();
+                
+                // Insertar la imagen en la posicion del cursor o al final
+                const index = range ? range.index : quill.getLength();
+                quill.insertEmbed(index, 'image', base64Image);
+            };
+            
+            reader.readAsDataURL(file);
+        }
+    }
+}
+});
+
+//Fin-Soltar imagen sobre orta note
+
+
+// Autoguardado del codigo, por si se va la luz Configuracion: Intervalo de 30 segundos (30000 ms)
+const AUTO_SAVE_INTERVAL = 30000;
+let lastContent = '';
+
+setInterval(async () => {
+try {
+    // Obtenemos el contenido actual en formato Delta (mas ligero y preciso)
+    const currentContent = JSON.stringify(quill.getContents());
+
+    // Solo guardamos si el contenido ha cambiado para no estresar el disco
+    if (currentContent !== lastContent) {
+        // Enviamos al proceso principal para escribir el archivo fisico
+        // Nota: Debes tener el canal 'auto-save-recovery' configurado en main.js
+        ipcRenderer.send('auto-save-recovery', currentContent);
+        
+        lastContent = currentContent;
+        console.log('Respaldo de seguridad actualizado automáticamente.');
+    }
+} catch (err) {
+    console.error('Error en el proceso de auto-guardado:', err);
+}
+}, AUTO_SAVE_INTERVAL);
+// Configuracion: Intervalo de 30 segundos (30000 ms)
+
+
+//Exportar texto plano
+ipcRenderer.on('request-export-txt', () => {
+console.log("Recibida petición de exportación..."); // Debug para tu consola (F12)
+
+// Obtenemos el texto de Quill
+const text = quill.getText();
+
+// Lo enviamos de vuelta al proceso principal para que abra el diálogo de guardado
+ipcRenderer.send('export-to-txt', text);
+}); //Exportar texto plano
+
+// Exportar PDF
+
+
+
+
+//ventana ontop
+ipcRenderer.on('ontop-updated', (event, isAlwaysOnTop) => {
+const status = document.getElementById('ontop-status');
+status.style.display = isAlwaysOnTop ? 'inline' : 'none';
+});  //ventana ontop
+
+
+// Autoguardado del documento que se está editando
+
+    function showSaveMessage() {
+    const saveStatus = document.getElementById('save-status');
+    saveStatus.style.opacity = '1'; // Lo hace visible
+    
+    setTimeout(() => {
+        saveStatus.style.opacity = '0'; // Lo oculta tras 2 segundos
+    }, 2000);
+}
+
+// Integramos en tu listener de 'text-change' ya existente
+quill.on('text-change', () => {
+    clearTimeout(autoSaveTimeout);
+    autoSaveTimeout = setTimeout(() => {
+        if (currentFilePath) {
+            ipcRenderer.send('save-to-disk', JSON.stringify(quill.getContents()), currentFilePath, getSuggestedName());
+            showSaveMessage(); // <--- Llamamos a la función aquí
+        }
+    }, 2000);
+    updateStatusBar();
+});
+
+// También lo añadimos para el respaldo de seguridad (el de los 30s)
+ipcRenderer.on('file-saved-success', (e, p) => {
+    currentFilePath = p;
+    showSaveMessage(); // Confirmación visual de guardado exitoso
+});
+ // FIN Autoguardado del documento que se está editando
+
+
+//  Correcto ortografico
+ipcRenderer.on('toggle-spellcheck', (event, isEnabled) => {
+    const editorElement = document.querySelector('.ql-editor');
+    if (editorElement) {
+        // El atributo 'spellcheck' es nativo del navegador/Electron
+        editorElement.setAttribute('spellcheck', isEnabled);
+        console.log(`Corrector ortográfico: ${isEnabled ? 'Activado' : 'Desactivado'}`);
+    }
+});
+
+// --- Guardar como ---
+ipcRenderer.on('request-save-as', () => {
+    // 1. Recogemos el contenido actual
+    const content = JSON.stringify(quill.getContents());
+    // 2. Pedimos un nombre sugerido (la primera línea de la nota)
+    const suggestedName = getSuggestedName();
+    // 3. Enviamos al proceso principal para que abra el diálogo de 'Guardar como'
+    // Forzamos que el path sea null para que el proceso principal sepa que es 'nuevo'
+    ipcRenderer.send('save-to-disk', content, null, suggestedName);
+});
+
+
+
+
+//Fin script

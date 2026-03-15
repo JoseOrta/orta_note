@@ -89,9 +89,17 @@ function createWindow() {
                         // En este caso, el Main puede disparar la accion directamente
                         ipcMain.emit('export-to-pdf'); 
                     }
-                }, // Fin exportar pef
+                }, // Fin exportar pdf
+                //guardar como
+                {
+                    label: 'Guardar como...',
+                    accelerator: 'CmdOrCtrl+Shift+S',
+                    click: () => {
+                        // Enviamos la orden al renderer para que nos de el contenido actual
+                        mainWindow.webContents.send('request-save-as');
+                    }
+                },
 
-                { label: 'Guardar como...', accelerator: 'CmdOrCtrl+Shift+S', click: () => mainWindow.webContents.send('file-save-as') },
                 { type: 'separator' },
                 { label: 'Salir', role: 'quit' }
                 
@@ -353,7 +361,6 @@ function createWindow() {
 
 
             // Exportar pdf
-
         
             dialog.showSaveDialog(mainWindow, options).then(result => {
                 if (!result.canceled && result.filePath) {
