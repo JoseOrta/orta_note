@@ -73,6 +73,17 @@ ipcRenderer.on('edit-redo', () => quill.history.redo());
 ipcRenderer.on('edit-cut', () => document.execCommand('cut'));
 ipcRenderer.on('edit-copy', () => document.execCommand('copy'));
 ipcRenderer.on('edit-paste', () => document.execCommand('paste'));
+// --- Eliminar ---
+ipcRenderer.on('edit-delete', () => {
+    const range = quill.getSelection();
+    if (range && range.length > 0) {
+        // Borra el texto seleccionado
+        quill.deleteText(range.index, range.length);
+    } else if (range) {
+        // Si no hay nada sombreado, borra el caracter siguiente (como la tecla Supr)
+        quill.deleteText(range.index, 1);
+    }
+});
 
 /* --- FUNCIONES DE ARCHIVOS --- */
 ipcRenderer.on('file-new-confirmed', () => { quill.setContents([]); currentFilePath = null; updateStatusBar(); });

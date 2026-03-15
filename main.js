@@ -115,7 +115,14 @@ function createWindow() {
                 { label: 'Cortar', accelerator: 'CmdOrCtrl+X', click: () => mainWindow.webContents.send('edit-cut') },
                 { label: 'Copiar', accelerator: 'CmdOrCtrl+C', click: () => mainWindow.webContents.send('edit-copy') },
                 { label: 'Pegar', accelerator: 'CmdOrCtrl+V', click: () => mainWindow.webContents.send('edit-paste') },
-                { label: 'Eliminar', click: () => mainWindow.webContents.send('edit-delete') },
+                //Eliminar texto con este boton del menú
+                {
+                    label: 'Eliminar',
+                    accelerator: 'Delete',
+                    click: () => {
+                        mainWindow.webContents.send('edit-delete'); // Enviamos la señal
+                    }
+                },
                 { type: 'separator' },
                 /*Seleccionar todo eltexto*/
                 { 
