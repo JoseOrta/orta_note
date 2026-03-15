@@ -3,8 +3,34 @@ const fs = require('fs');
 const path = require('path');
 
 
+//Eliminar errores al escribir en sitios sin permiso
+// 1. Desactivar la aceleración por hardware (evita la pantalla verde y el error de GPU cache)
+app.disableHardwareAcceleration();
+//--------------------------------------------------------------
+// 2. Definir una ruta de datos personalizada
+// Esto evita que busque en carpetas protegidas si hay problemas de permisos
+const customUserDataPath = path.join(app.getPath('userData'), '..', 'orta-note-data');
+app.setPath('userData', customUserDataPath);
+// 3. Evitar que se abran múltiples instancias que bloqueen la base de datos
+const isPrimaryInstance = app.requestSingleInstanceLock();
+if (!isPrimaryInstance) {
+    app.quit();
+}
+//Fin //Eliminar errores al escribir en sitios sin permiso
+
+//Titulo de la ventana
+// Escuchar el evento para cambiar el título
+ipcMain.on('update-title', (event, fileName) => {
+    const win = BrowserWindow.getFocusedWindow();
+    if (win) {
+        // Formato: Archivo.json - Orta Note Lite Version
+        win.setTitle(`${fileName} - Orta Note Lite Version`);
+    }
+});
+// FIN Titulo de la ventana
 
 
+//Ventana Splash
 function createWindow() {
     // 1. Crear la ventana de carga (Splash)
     splash = new BrowserWindow({
@@ -18,12 +44,21 @@ function createWindow() {
     });
     splash.loadFile('splash.html');
 
+
+  
+    
+    // Opcional: Si quieres que el título cambie automáticamente 
+    // cuando el HTML lo pida, Electron lo hace por defecto.
+
+
+    //Ventana del sistema en ejecucion
     // 2. Configurar la ventana principal (oculta al inicio)
     mainWindow = new BrowserWindow({
         width: 1000,
         height: 800,
         show: false, 
         backgroundColor: '#ffffff',
+        title: "Orta Note", // Título inicial
         icon: path.join(__dirname, 'build/icon.ico'),
         webPreferences: {
             nodeIntegration: true,
@@ -31,6 +66,7 @@ function createWindow() {
             spellcheck: true
         }
     });
+
     // Inicio del codigo: Forzar apertura de links en navegador externo
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
         // Importamos shell de electron si no lo tienes arriba

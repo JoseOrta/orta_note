@@ -67,6 +67,16 @@ if (match) {
 }
 }
 
+//Nombre de la ventana = al del archivoo
+
+
+// --- EJEMPLO DE INTEGRACIÓN ---
+// Cuando cargues el archivo, dispara la función:
+// actualizarTituloPro("Lorem Ipsum Grande.json");
+
+
+//Fin nombre
+
 /* --- EVENTOS DE EDICIÓN DEL MENÚ --- */
 ipcRenderer.on('edit-undo', () => quill.history.undo());
 ipcRenderer.on('edit-redo', () => quill.history.redo());
