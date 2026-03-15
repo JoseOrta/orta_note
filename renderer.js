@@ -151,78 +151,49 @@ quill.on('selection-change', (range) => {
 
 
 //Pegar con mouse
+// --- Control Unificado de Botón Central (v1.1.2) ---
+let lastPasteTime = 0;
+const PASTE_THRESHOLD = 300; // Subimos a 300ms para mayor seguridad
 
-document.getElementById('editor').addEventListener('auxclick', async (e) => {
-    // 1 es el código para el botón central (rueda)
-   document.getElementById('editor').addEventListener('mousedown', (e) => {
-    // Si es el botón central, prevenimos el auto-scroll de inmediato
-    if (e.button === 1) {
-        e.preventDefault();
-    }
+// 1. Prevenir el molesto icono de scroll de Windows
+document.getElementById('editor').addEventListener('mousedown', (e) => {
+    if (e.button === 1) e.preventDefault();
 }, false);
 
+// 2. ÚNICO Evento de Pegado Controlado
+document.getElementById('editor').addEventListener('auxclick', async (e) => {
+    if (e.button === 1) {
+        e.preventDefault();
+        e.stopPropagation();
 
-        //Pegar con rueda
-        document.getElementById('editor').addEventListener('auxclick', async (e) => {
-            if (e.button === 1) {
-                e.preventDefault(); // Doble seguridad para anular la flecha de desplazamiento
-                try {
-                    quill.focus();
-                    const text = await navigator.clipboard.readText();
-                    if (text) {
-                        const range = quill.getSelection(true);
-                        if (range) {
-                            quill.insertText(range.index, text);
-                            quill.setSelection(range.index + text.length);
-                        } else {
-                            quill.insertText(quill.getLength(), text);
-                        }
-                    }
-                } catch (err) {
-                    console.error('Error al pegar con rueda:', err);
-                }
-            }
-        });
+        const currentTime = Date.now();
+        
+        // FILTRO ANTI-REBOTE: Si el clic es muy rápido, se ignora
+        if (currentTime - lastPasteTime < PASTE_THRESHOLD) {
+            return;
+        }
+        lastPasteTime = currentTime;
 
-        //Prevenir que copie varias veces
-
-        // --- Corrección: Pegado con Rueda del Mouse (v1.1.2) ---
-        let lastPasteTime = 0;
-        const PASTE_THRESHOLD = 200; // Tiempo mínimo entre pegados en milisegundos
-
-        document.addEventListener('auxclick', async (e) => {
-            // 1 es el botón central (rueda)
-            if (e.button === 1) {
-                const currentTime = Date.now();
+        try {
+            const text = await navigator.clipboard.readText();
+            if (text) {
+                // Forzamos el foco en Quill antes de insertar
+                quill.focus();
+                const range = quill.getSelection(true);
                 
-                // Si el clic ocurre muy rápido después del anterior, lo bloqueamos
-                if (currentTime - lastPasteTime < PASTE_THRESHOLD) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return;
-                }
-
-                lastPasteTime = currentTime;
-
-                // Intentamos leer el portapapeles y pegar de forma controlada
-                try {
-                    const text = await navigator.clipboard.readText();
-                    if (text) {
-                        const range = quill.getSelection();
-                        if (range) {
-                            quill.insertText(range.index, text, 'user');
-                            quill.setSelection(range.index + text.length);
-                        }
-                    }
-                } catch (err) {
-                    console.error('Error al pegar con rueda:', err);
+                if (range) {
+                    quill.insertText(range.index, text, 'user');
+                    quill.setSelection(range.index + text.length);
+                } else {
+                    // Si no hay selección, pegamos al final
+                    quill.insertText(quill.getLength(), text, 'user');
                 }
             }
-        });
+        } catch (err) {
+            console.error('Error en pegado táctico:', err);
+        }
+    }
 });
-
-
-
 
 //fin pegar con mouse
 
