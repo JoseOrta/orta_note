@@ -1,7 +1,7 @@
 {
   "name": "orta_note",
-  "version": "1.1.0",
-  "description": "Editor de notas ligero y rápido para Sysadmins, con sintaxis Orta.",
+  "version": "1.1.1",
+  "description": "Orta Note Lite - Stability Update",
   "author": "José Orta",
   "main": "main.js",
   "scripts": {

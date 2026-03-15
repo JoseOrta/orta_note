@@ -198,7 +198,7 @@ function createWindow() {
                             type: 'info',
                             title: 'Acerca de Orta Note',
                             icon: path.join(__dirname, 'build/icon.ico'),
-                            message: 'Orta Note Lite v1.0.5',
+                            message: 'Orta Note Lite v1.1.1',
                             detail: 'Autor: Ing. José Aníbal Orta Núñez 🇻🇪\n' +
                                     'Proyecto: Orta Infinito\n' +
                                     'Tecnología: Electron + Quill.js\n\n' +
