@@ -354,6 +354,30 @@ ipcRenderer.on('request-save-as', () => {
     ipcRenderer.send('save-to-disk', content, null, suggestedName);
 });
 
+// --- corrector ---
+
+// Función para aplicar el corrector al elemento correcto de Quill
+const applySpellcheck = (enabled) => {
+    // Buscamos el div con clase .ql-editor que es donde vive el texto
+    const editorElement = document.querySelector('.ql-editor');
+    if (editorElement) {
+        editorElement.setAttribute('spellcheck', enabled);
+    }
+};
+
+// 1. Escuchar los cambios desde el menú (tu lógica de main.js)
+ipcRenderer.on('toggle-spellcheck', (event, isEnabled) => {
+    applySpellcheck(isEnabled);
+});
+
+// 2. FORZAR ACTIVACIÓN AL INICIO
+// Usamos un pequeño delay para asegurar que Quill ya creó el div .ql-editor
+setTimeout(() => {
+    applySpellcheck(true); 
+    console.log("Corrector iniciado por defecto.");
+}, 1000);
+
+
 
 
 
