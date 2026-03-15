@@ -4,12 +4,17 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 module.exports = {
   packagerConfig: {
     asar: true,
+    // 1. Icono para el ejecutable de la aplicación (.exe principal)
+    icon: './build/icon' // NOTA: Sin la extensión .ico, Forge la añade automáticamente
   },
   rebuildConfig: {},
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {},
+      config: {
+        // 2. Icono para el instalador (Setup.exe)
+        setupIcon: './build/icon.ico', // AQUÍ SÍ CON .ico
+      },
     },
     {
       name: '@electron-forge/maker-zip',
