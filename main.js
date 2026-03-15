@@ -31,11 +31,6 @@ function createWindow() {
             spellcheck: true
         }
     });
-
-
-
-
-
     // Inicio del codigo: Forzar apertura de links en navegador externo
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
         // Importamos shell de electron si no lo tienes arriba
@@ -355,14 +350,18 @@ function createWindow() {
                 buttonLabel: 'Guardar PDF',
                 filters: [{ name: 'Adobe PDF', extensions: ['pdf'] }]
             };
+
+
+            // Exportar pdf
+
         
             dialog.showSaveDialog(mainWindow, options).then(result => {
                 if (!result.canceled && result.filePath) {
                     // Generamos el PDF desde el contenido de la ventana
                     mainWindow.webContents.printToPDF({
-                        printBackground: true, // Importante para mantener tus estilos y bloques de codigo
-                        marginsType: 1,        // Margenes estandar
-                        pageSize: 'A4'
+                        marginsType: 0, // 0 = Margen por defecto, permite saltos de página
+                        printBackground: true,
+                        pageSize: 'A4' // O 'Letter'
                     }).then(data => {
                         fs.writeFile(result.filePath, data, (error) => {
                             if (error) {

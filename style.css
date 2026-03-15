@@ -75,17 +75,26 @@ body, html { margin: 0; padding: 0; height: 100%; background: #fff; font-family:
     padding-right: 10px;        /* Espacio de seguridad al final */
 }
 
-/* Inicio del codigo: Estilos de Impresion PDF */
+
+
+/* Configuración para exportación a PDF */
 @media print {
-    #toolbar, #status-bar {
-        display: none !important; /* Oculta la UI en el PDF */
+    body, html {
+        height: auto !important;
+        overflow: visible !important;
     }
-    body {
-        background: white !important;
+    #editor {
+        height: auto !important;
+        overflow: visible !important;
     }
     .ql-editor {
-        padding: 0 !important;
+        height: auto !important;
         overflow: visible !important;
+        padding: 0 !important;
+    }
+    /* Ocultar la barra de herramientas y estatus en el PDF */
+    #toolbar, #status-bar {
+        display: none !important;
     }
 }
 /* Fin del codigo: Estilos de Impresion PDF */
