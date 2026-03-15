@@ -24,3 +24,6 @@ Filtro Anti-Rebote (Mouse): Implementado debounce de 300ms en el botón central 
 GPU & Render: Desactivación de la aceleración por hardware (disableHardwareAcceleration) para eliminar parpadeos verdes y errores de caché en sistemas Windows.
 
 I/O Error Fix: Optimización de rutas de datos de usuario para evitar errores de "Acceso Denegado (0x5)" en unidades secundarias.
+
+---------------------------
+Se compilará esta version para probar
