@@ -115,7 +115,7 @@ function createWindow() {
                 { label: 'Cortar', accelerator: 'CmdOrCtrl+X', click: () => mainWindow.webContents.send('edit-cut') },
                 { label: 'Copiar', accelerator: 'CmdOrCtrl+C', click: () => mainWindow.webContents.send('edit-copy') },
                 { label: 'Pegar', accelerator: 'CmdOrCtrl+V', click: () => mainWindow.webContents.send('edit-paste') },
-                //Eliminar texto con este boton del menú
+                //Eliminar texto con este boton del
                 {
                     label: 'Eliminar',
                     accelerator: 'Delete',
@@ -169,19 +169,24 @@ function createWindow() {
                                 '• Ctrl + B (Negrita)\n' +
                                 '• Ctrl + I (Cursiva)\n' +
                                 '• Ctrl + U (Subrayado)\n' +
-                                '• Ctrl + Shift + C (Bloque de Código)\n' +
-                                '• Middle Click (Rueda Mouse) (Pegar texto)\n\n' +
-                                '--- SINTAXIS ORTA (Codigo + Espacio) ---\n' +
-                                '• n-texto-(Presionar Espacio) (Negrita)\n' +
-                                '• i-texto-(Presionar Espacio) (Cursiva)\n' +
-                                '• s-texto-(Presionar Espacio) (Subrayado)\n' +
-                                '• t-texto-(Presionar Espacio) (Título Principal)\n' +
-                                '• st-texto-(Presionar Espacio) (Subtítulo)\n' +
-                                '• cod-texto-(Presionar Espacio) (Bloque de Código)\n\n' +
-                                '--- TIPS DE SYSADMIN ---\n' +
-                                '• El corrector se puede alternar desde el menú Editar.\n' +
-                                '• El sombreado de texto copia automáticamente al portapapeles.\n' +
-                                '• Al guardar tu nota, se sugiere el nombre basado en la primera línea.'
+                                '• Ctrl + Shift + S (Guardar como...)\n' +
+                                '• Middle Click (Rueda Mouse) (Pegar texto directo)\n\n' +
+                                '--- SINTAXIS ORTA (Formato + Espacio) ---\n' +
+                                '• n-texto-  (Negrita)\n' +
+                                '• i-texto-  (Cursiva)\n' +
+                                '• s-texto-  (Subrayado)\n' +
+                                '• tp-texto- (Tachado)\n' + // <--- Añadido el nuevo comando
+                                '• t-texto-  (Título Principal)\n' +
+                                '• st-texto- (Subtítulo)\n' +
+                                '• cod-texto-(Bloque de Código)\n' +
+                                '• lt-(presionar espacio) (Checklist interactiva)\n\n' +
+                                '• 1.-(presionar espacio) (Checklist Numerada)\n\n' +
+                                '• *(presionar espacio) (Checklist Viñeta)\n\n' +                                
+                                '--- NOTAS DE ESTABILIDAD v1.1.1 ---\n' +
+                                '• PDF: Ahora soporta múltiples hojas sin cortes.\n' +
+                                '• Scroll: Botón central optimizado (sin flechas de navegación).\n' +
+                                '• Core: Lógica migrada a Renderer para mayor velocidad.\n' +
+                                '• Corrector: Diccionario activo por defecto y sincronizado.'
                         });
                     }
                 },
