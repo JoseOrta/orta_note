@@ -151,11 +151,10 @@ quill.on('selection-change', (range) => {
 
 
 //Pegar con mouse
-// --- REEMPLAZA EL EVENTO AUXCLICK POR ESTE ---
+
 document.getElementById('editor').addEventListener('auxclick', async (e) => {
     // 1 es el código para el botón central (rueda)
-    // --- REEMPLAZA EL EVENTO AUXCLICK EN renderer.js ---
-document.getElementById('editor').addEventListener('mousedown', (e) => {
+   document.getElementById('editor').addEventListener('mousedown', (e) => {
     // Si es el botón central, prevenimos el auto-scroll de inmediato
     if (e.button === 1) {
         e.preventDefault();
@@ -184,7 +183,48 @@ document.getElementById('editor').addEventListener('mousedown', (e) => {
                 }
             }
         });
+
+        //Prevenir que copie varias veces
+
+        // --- Corrección: Pegado con Rueda del Mouse (v1.1.2) ---
+        let lastPasteTime = 0;
+        const PASTE_THRESHOLD = 200; // Tiempo mínimo entre pegados en milisegundos
+
+        document.addEventListener('auxclick', async (e) => {
+            // 1 es el botón central (rueda)
+            if (e.button === 1) {
+                const currentTime = Date.now();
+                
+                // Si el clic ocurre muy rápido después del anterior, lo bloqueamos
+                if (currentTime - lastPasteTime < PASTE_THRESHOLD) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
+
+                lastPasteTime = currentTime;
+
+                // Intentamos leer el portapapeles y pegar de forma controlada
+                try {
+                    const text = await navigator.clipboard.readText();
+                    if (text) {
+                        const range = quill.getSelection();
+                        if (range) {
+                            quill.insertText(range.index, text, 'user');
+                            quill.setSelection(range.index + text.length);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Error al pegar con rueda:', err);
+                }
+            }
+        });
 });
+
+
+
+
+//fin pegar con mouse
 
 //Sintax Orta para Lista de tarea lt-
 quill.on('text-change', (delta, oldDelta, source) => {
