@@ -22,9 +22,59 @@ var quill = new Quill('#editor', {
     placeholder: '    Orta Note'
 });
 
+
+//Nombre de la ventana = al del archivoo
+// --- 1. FUNCIÓN GLOBAL DE TÍTULO (v1.1.3) ---
+function updateAppTitle(name = "Sin Título") {
+    // Si viene una ruta completa (E:\...), extraemos solo el nombre del archivo
+    const path = require('path');
+    const fileName = path.basename(name);
+    ipcRenderer.send('update-title', fileName);
+}
+/* --- FUNCIONES DE ARCHIVOS --- */
+
+// Al crear un archivo NUEVO
+ipcRenderer.on('file-new-confirmed', () => { 
+    quill.setContents([]); 
+    currentFilePath = null; 
+    updateStatusBar(); 
+    updateAppTitle("Sin Título"); // <--- AÑADIR ESTO
+});
+
+// Al ABRIR un archivo
+ipcRenderer.on('file-opened', (e, c, p) => { 
+    try { quill.setContents(JSON.parse(c)); } catch { quill.setText(c); } 
+    currentFilePath = p; 
+    updateStatusBar();
+    updateAppTitle(p); // <--- AÑADIR ESTO (p es la ruta del archivo)
+});
+
+// Al GUARDAR con éxito
+ipcRenderer.on('file-saved-success', (e, p) => {
+    currentFilePath = p;
+    showSaveMessage();
+    updateAppTitle(p); // <--- AÑADIR ESTO
+});
+
+
+// --- EJEMPLO DE INTEGRACIÓN ---
+// Cuando cargues el archivo, dispara la función:
+// actualizarTituloPro("Lorem Ipsum Grande.json");
+
+
+
+
+
+
 function processOrtaSyntax(range) {
 const [line, offset] = quill.getLine(range.index);
 const textBefore = line.domNode.textContent.slice(0, offset);
+
+
+
+
+
+
 
 // Regex mejorada: admite prefijos como 'n' o 'tp'
 const match = textBefore.match(/([a-z]+)-([^-]+)-$/); 
@@ -67,12 +117,7 @@ if (match) {
 }
 }
 
-//Nombre de la ventana = al del archivoo
 
-
-// --- EJEMPLO DE INTEGRACIÓN ---
-// Cuando cargues el archivo, dispara la función:
-// actualizarTituloPro("Lorem Ipsum Grande.json");
 
 
 //Fin nombre

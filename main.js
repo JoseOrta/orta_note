@@ -18,20 +18,9 @@ if (!isPrimaryInstance) {
 }
 //Fin //Eliminar errores al escribir en sitios sin permiso
 
-//Titulo de la ventana
-// Escuchar el evento para cambiar el título
-ipcMain.on('update-title', (event, fileName) => {
-    const win = BrowserWindow.getFocusedWindow();
-    if (win) {
-        // Formato: Archivo.json - Orta Note Lite Version
-        win.setTitle(`${fileName} - Orta Note Lite Version`);
-    }
-});
-// FIN Titulo de la ventana
-
-
 //Ventana Splash
 function createWindow() {
+    //Titulo de la ventana    
     // 1. Crear la ventana de carga (Splash)
     splash = new BrowserWindow({
         width: 400,
@@ -43,13 +32,7 @@ function createWindow() {
         icon: path.join(__dirname, 'build/icon.ico')
     });
     splash.loadFile('splash.html');
-
-
-  
-    
-    // Opcional: Si quieres que el título cambie automáticamente 
-    // cuando el HTML lo pida, Electron lo hace por defecto.
-
+//fin splash
 
     //Ventana del sistema en ejecucion
     // 2. Configurar la ventana principal (oculta al inicio)
@@ -58,7 +41,8 @@ function createWindow() {
         height: 800,
         show: false, 
         backgroundColor: '#ffffff',
-        title: "Orta Note", // Título inicial
+        //titulo de la ventana
+        title: "Sin Título - Orta Note Lite",
         icon: path.join(__dirname, 'build/icon.ico'),
         webPreferences: {
             nodeIntegration: true,
@@ -66,6 +50,16 @@ function createWindow() {
             spellcheck: true
         }
     });
+    //Titulo de la ventana
+    // Elemento para asignar el nombre a la ventana
+    mainWindow.on('page-title-updated', (e) => {
+        e.preventDefault(); // Evita que el <title> del HTML mande sobre el de Windows
+    });
+    // FIN Titulo de la ventana
+
+
+
+
 
     // Inicio del codigo: Forzar apertura de links en navegador externo
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
@@ -452,7 +446,13 @@ function createWindow() {
         
 
 
-
+//Receptor para aplicar titulo de la ventana
+ipcMain.on('update-title', (event, fileName) => {
+    if (mainWindow) {
+        mainWindow.setTitle(`${fileName} - Orta Note Lite Version`);
+    }
+});
+//Receptor para aplicar titulo de la ventana
 
 
 
