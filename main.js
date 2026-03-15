@@ -211,7 +211,7 @@ function createWindow() {
                                 '• lt-(presionar espacio) (Checklist interactiva)\n\n' +
                                 '• 1.-(presionar espacio) (Checklist Numerada)\n\n' +
                                 '• *(presionar espacio) (Checklist Viñeta)\n\n' +                                
-                                '--- Versión 1.1.3---\n' +
+                                '•--- Versión 1.1.3---\n' 
                         });
                     }
                 },
