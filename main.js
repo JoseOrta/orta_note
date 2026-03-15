@@ -199,24 +199,19 @@ function createWindow() {
                                 '• Ctrl + B (Negrita)\n' +
                                 '• Ctrl + I (Cursiva)\n' +
                                 '• Ctrl + U (Subrayado)\n' +
-                                '• Ctrl + Shift + S (Guardar como...)\n' +
                                 '• Middle Click (Rueda Mouse) (Pegar texto directo)\n\n' +
                                 '--- SINTAXIS ORTA (Formato + Espacio) ---\n' +
                                 '• n-texto-  (Negrita)\n' +
                                 '• i-texto-  (Cursiva)\n' +
                                 '• s-texto-  (Subrayado)\n' +
-                                '• tp-texto- (Tachado)\n' + // <--- Añadido el nuevo comando
+                                '• tp-texto- (Tachado)\n' +
                                 '• t-texto-  (Título Principal)\n' +
                                 '• st-texto- (Subtítulo)\n' +
                                 '• cod-texto-(Bloque de Código)\n' +
                                 '• lt-(presionar espacio) (Checklist interactiva)\n\n' +
                                 '• 1.-(presionar espacio) (Checklist Numerada)\n\n' +
                                 '• *(presionar espacio) (Checklist Viñeta)\n\n' +                                
-                                '--- NOTAS DE ESTABILIDAD v1.1.1 ---\n' +
-                                '• PDF: Ahora soporta múltiples hojas sin cortes.\n' +
-                                '• Scroll: Botón central optimizado (sin flechas de navegación).\n' +
-                                '• Core: Lógica migrada a Renderer para mayor velocidad.\n' +
-                                '• Corrector: Diccionario activo por defecto y sincronizado.'
+                                '--- Versión 1.1.3---\n' +
                         });
                     }
                 },
@@ -228,7 +223,7 @@ function createWindow() {
                             type: 'info',
                             title: 'Acerca de Orta Note',
                             icon: path.join(__dirname, 'build/icon.ico'),
-                            message: 'Orta Note Lite v1.1.1',
+                            message: 'Orta Note Lite v1.1.3',
                             detail: 'Autor: Ing. José Aníbal Orta Núñez 🇻🇪\n' +
                                     'Proyecto: Orta Infinito\n' +
                                     'Tecnología: Electron + Quill.js\n\n' +
