@@ -378,6 +378,77 @@ setTimeout(() => {
 }, 1000);
 
 
+//Motor de busqueda d epalabras
+
+let searchIndices = [];
+let currentSearchIndex = -1;
+
+// Mostrar barra con Ctrl + F (Opcional, pero recomendado)
+window.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault();
+        const bar = document.getElementById('search-bar');
+        bar.style.display = 'flex';
+        document.getElementById('search-input').focus();
+    }
+});
+
+// Función Principal de Búsqueda
+document.getElementById('search-input').addEventListener('input', function() {
+    const query = this.value;
+    const text = quill.getText();
+    searchIndices = [];
+    currentSearchIndex = -1;
+
+    if (query.length > 0) {
+        let index = text.toLowerCase().indexOf(query.toLowerCase());
+        while (index !== -1) {
+            searchIndices.push(index);
+            index = text.toLowerCase().indexOf(query.toLowerCase(), index + 1);
+        }
+    }
+    updateSearchUI();
+});
+
+// Evento Enter para avanzar
+document.getElementById('search-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && searchIndices.length > 0) {
+        navigateSearch(1);
+    }
+});
+
+function navigateSearch(direction) {
+    if (searchIndices.length === 0) return;
+
+    currentSearchIndex += direction;
+    if (currentSearchIndex >= searchIndices.length) currentSearchIndex = 0;
+    if (currentSearchIndex < 0) currentSearchIndex = searchIndices.length - 1;
+
+    const pos = searchIndices[currentSearchIndex];
+    const queryLen = document.getElementById('search-input').value.length;
+
+    // Resaltar en el editor y hacer scroll
+    quill.setSelection(pos, queryLen, 'user');
+    updateSearchUI();
+}
+
+function updateSearchUI() {
+    const countSpan = document.getElementById('search-count');
+    if (searchIndices.length > 0) {
+        countSpan.innerText = `${currentSearchIndex + 1}/${searchIndices.length}`;
+    } else {
+        countSpan.innerText = "0/0";
+    }
+}
+
+// Botones de navegación
+document.getElementById('btn-next').onclick = () => navigateSearch(1);
+document.getElementById('btn-prev').onclick = () => navigateSearch(-1);
+document.getElementById('btn-close-search').onclick = () => {
+    document.getElementById('search-bar').style.display = 'none';
+};
+
+
 
 
 

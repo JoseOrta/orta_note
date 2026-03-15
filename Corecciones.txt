@@ -1,13 +1,2 @@
-Changelog v1.1.1 (14-03-2026)
+Changelog v1.2.0 (15-03-2026)
 
-Refactor: Migrada lógica de index.html a renderer.js.
-
-Fix: Corregido bug de sintaxis que no permitía prefijos de más de una letra (tp-).
-
-Fix: Anulado auto-scroll nativo para habilitar pegado rápido con botón central.
-
-Fix: Implementado CSS @media print para evitar cortes en PDF.
-
-Fix: Restaurado enlace de menú "Guardar como" y "Eliminar".
-
-Fix: Sincronizado Spellcheck con el ciclo de vida de Quill.

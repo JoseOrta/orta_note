@@ -93,6 +93,18 @@
         <span id="ontop-status" style="color: #007acc; font-weight: bold; display: none;">📌 FIJADO</span>
         <span id="save-status" style="margin-left: auto; margin-right: 20px; color: #28a745; font-weight: bold; opacity: 0; transition: opacity 0.3s; white-space: nowrap;">✓ Guardado</span>
     </div>
+
+    <!-- Barra de busqueda -->
+    <div id="search-bar" style="display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #f0f0f0; border-top: 1px solid #ccc; padding: 5px 15px; display: flex; align-items: center; gap: 10px; z-index: 1000;">
+        <input type="text" id="search-input" placeholder="Buscar texto..." style="flex: 1; padding: 4px 8px; border: 1px solid #aaa; border-radius: 4px;">
+        <span id="search-count" style="font-size: 12px; color: #666; min-width: 50px;">0/0</span>
+        <button id="btn-prev" style="padding: 2px 8px;">▲</button>
+        <button id="btn-next" style="padding: 2px 8px;">▼</button>
+        <button id="btn-close-search" style="padding: 2px 8px; background: #ffcccc; border: 1px solid #f99;">X</button>
+    </div>
+
+
+
     <script src="./node_modules/quill/dist/quill.js"></script>
     <script src="./node_modules/quill-image-resize-module/image-resize.min.js"></script>
     <script src="renderer.js"></script>
